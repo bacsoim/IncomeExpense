@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.incomeexpense.data.AppDataBase
+import com.example.incomeexpense.data.Budget
 import com.example.incomeexpense.data.BudgetItem
 import com.example.incomeexpense.databinding.BudgetItemBinding
 
@@ -38,6 +40,8 @@ class BudgetAdapter : RecyclerView.Adapter<BudgetAdapter.ViewHolder> {
         return items.size
     }
 
+    queryBudget()
+
     fun addItem(item: BudgetItem) {
         items.add(item)
         notifyItemInserted(items.lastIndex)
@@ -47,30 +51,53 @@ class BudgetAdapter : RecyclerView.Adapter<BudgetAdapter.ViewHolder> {
     inner class ViewHolder(val budgetItemBinding: BudgetItemBinding): RecyclerView.ViewHolder(budgetItemBinding.root) {
 
         fun bind(budgetItem: BudgetItem) {
-            budgetItemBinding.tvName.text = budgetItem.name
+            budgetItemBinding.tvName.text = budgetItem.description
             budgetItemBinding.tvPrice.text = budgetItem.value.toString()
             budgetItemBinding.rbtnIncome.isChecked = budgetItem.income_type
             budgetItemBinding.rbtnExpense.isChecked = budgetItem.expense_type
 
             //when (BudgetItem.category) {
-           //     0 -> {
+            //     0 -> {
             //        shopItemBinding.ivItemLogo.setImageResource(R.drawable.food)
             //    }
-           //     1 -> {
-           //         shopItemBinding.ivItemLogo.setImageResource(R.drawable.clothes)
-           //     }
-           //     2 -> {
-           //         shopItemBinding.ivItemLogo.setImageResource(R.drawable.sport)
-           //     }
-          //  }
+            //     1 -> {
+            //         shopItemBinding.ivItemLogo.setImageResource(R.drawable.clothes)
+            //     }
+            //     2 -> {
+            //         shopItemBinding.ivItemLogo.setImageResource(R.drawable.sport)
+            //     }
+            //  }
 
             budgetItemBinding.btnSave.setOnClickListener {
-                addItem(adapterPosition)
+                saveBudget
             }
 
             budgetItemBinding.btnDelete.setOnClickListener {
                 deleteItem(adapterPosition)
             }
+        }
+
+
+            fun saveBudget() {
+                Thread {
+                    AppDataBase.getInstance(this@BudgetAdapter).budgetDao().insertBudget(
+                        Budget(null, tvName.text.toString(), tvPrice.text.toString())
+                    )
+            }.start()
+        }
+
+        fun queryBudget(){
+            Thread {
+                var budgetrows=AppDataBase.getInstance(this@BudgetAdapter).budgetDao().getAllBudget()
+
+                runOnUiThread{
+                    tvRows.text=""
+                    budgetrows.forEach{
+                        tvRows.append("${it.description} - ${it.value} - ${it.income_type} - ${it.expense_type}\n")
+                    }
+                }
+
+            }.start()
         }
 
     }

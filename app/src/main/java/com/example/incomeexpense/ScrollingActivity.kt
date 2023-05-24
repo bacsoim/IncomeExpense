@@ -39,6 +39,9 @@ class ScrollingActivity : AppCompatActivity(), BudgetItemDialog.BudgetItemDialog
     }
 
 
+    }
+
+
 
 
 }
